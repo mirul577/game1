@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathoria Online — MVVM MMORPG</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header>
+  <h1>⚔ MATHORIA ONLINE</h1>
+  <div class="top-stats">
+    <button id="journalButton" type="button">📜 Quest Journal (J)</button>
+    <button id="mapButton" type="button">🗺 World Map (M)</button>
+    <span>🪙 <b id="gold">30</b> Gold</span>
+    <span>⭐ Level <b id="level">1</b></span>
+    <span>⚔ <b id="weapon">Wooden Sword</b></span>
+  </div>
+</header>
+
+<main>
+  <section class="game-panel">
+    <canvas id="gameCanvas" width="800" height="520" aria-label="Mathoria game world"></canvas>
+    <div class="hud">
+      <div class="player-hud">
+        <b id="playerName">Adventurer</b> · <span id="className">Knight</span>
+        <small>HP <span id="hpText">100/100</span></small>
+        <div class="bar"><div id="hpBar" class="fill hp"></div></div>
+        <small>MP <span id="mpText">75/75</span></small>
+        <div class="bar"><div id="mpBar" class="fill mp"></div></div>
+      </div>
+      <div class="xp-hud">
+        <small>EXP <span id="xpText">0/50</span></small>
+        <div class="bar"><div id="xpBar" class="fill xp"></div></div>
+      </div>
+      <div class="hud-actions"><button id="potionButton">🧪 Potion (0)</button><button id="skillButton">✨ Arcane Strike (Q · 20 MP)</button></div>
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    <section class="panel">
+      <h2>📜 Quest Tracker</h2>
+      <div id="questTracker" class="tracker"></div>
+      <button id="openJournalButton" class="wide" type="button">Open Quest Journal (J)</button>
+    </section>
+    <section class="panel">
+      <h2>🧑 NPCs</h2>
+      <p class="muted">Move close to an NPC and press E. ❗ = new quest, ❓ = ready to turn in. Your class trainer stands near the village.</p>
+      <button id="interactButton" class="wide">Talk to nearest NPC (E)</button>
+    </section>
+    <section class="panel">
+      <h2>🏪 Adventurer Store</h2>
+      <div class="shop-row"><span>🧪 Health Potion <small>Restore 35 HP</small></span><button data-buy="potion">12g</button></div>
+      <div class="shop-row"><span>🗡 Iron Sword <small>+12 attack</small></span><button data-buy="sword">65g</button></div>
+      <div class="shop-row"><span>🛡 Shield <small>Reduce damage</small></span><button data-buy="shield">45g</button></div>
+    </section>
+    <section class="panel">
+      <h2>🌲 Open-world Inventory</h2>
+      <div class="resource-grid">
+        <span>🪵 Wood: <b id="woodCount">0</b></span>
+        <span>🪨 Stone: <b id="stoneCount">0</b></span>
+        <span>🍓 Berries: <b id="berryCount">0</b></span>
+      </div>
+      <p class="muted">Current biome: <b id="biomeName">FOREST</b></p>
+      <p class="muted">Move next to a tree, rock or berry bush and press E to gather.</p>
+    </section>
+    <section class="panel">
+      <h2>🛠 Crafting & Building</h2>
+      <div class="shop-row"><span>🧪 Potion <small>3 berries</small></span><button data-craft="potion">Craft</button></div>
+      <div class="shop-row"><span>⚔ Forest Blade <small>4 wood + 5 stone</small></span><button data-craft="sword">Craft</button></div>
+      <div class="shop-row"><span>⛺ Camp Shelter <small>12 wood + 8 stone</small></span><button data-craft="camp">Build</button></div>
+    </section>
+    <section class="panel">
+      <h2>🏕 Survival Status</h2>
+      <small>Hunger <b id="hungerText">100%</b></small>
+      <div class="bar"><div id="hungerBar" class="fill hunger" style="width:100%"></div></div>
+      <small>Thirst <b id="thirstText">100%</b></small>
+      <div class="bar"><div id="thirstBar" class="fill thirst" style="width:100%"></div></div>
+      <div class="shop-row"><span>🍓 Eat berries <small>Costs 2 berries</small></span><button id="eatButton">Eat</button></div>
+      <div class="shop-row"><span>💧 Drink water <small>Refill canteen</small></span><button id="drinkButton">Drink</button></div>
+      <p class="muted">Hunger and thirst decrease over time. At zero, you lose HP.</p>
+    </section>
+    <section class="panel">
+      <h2>👑 Kingdom Management</h2>
+      <p><b id="kingdomName">No kingdom founded</b></p>
+      <p class="muted">Royal guards: <b id="kingdomGuards">0</b> · Keep HP: <b id="fortHpText">—</b></p>
+      <input id="kingdomNameInput" maxlength="22" placeholder="Your kingdom name">
+      <button id="foundKingdomButton" class="wide">Found Kingdom (150g, 35 wood, 25 stone)</button>
+      <div class="shop-row"><span>🛡 Recruit Royal Guard <small>45 gold + 3 wood</small></span><button id="recruitGuardButton">Recruit</button></div>
+      <button id="declareWarButton" class="wide danger">⚔ Declare War on Ironfang</button>
+      <p class="muted">War status: <b id="warStatus">No war declared</b></p>
+      <p class="muted">Recruit at least 2 guards before declaring war. Defeat enemy raiders to defend your keep.</p>
+    </section>
+    <section class="panel">
+      <h2>🧑‍🌾 Living Village</h2>
+      <p class="muted">12 autonomous villagers have jobs and wander around the settlement: farmers, guards, healers, merchants, builders, cooks, fishers and scouts. Press E near them to interact.</p>
+    </section>
+    <section class="panel">
+      <h2>🧠 Mathematics Engine</h2>
+      <ul class="muted">
+        <li><b>Gradient:</b> bonus combat damage.</li>
+        <li><b>Absolute value:</b> distance to target.</li>
+        <li><b>Fibonacci:</b> combo gold rewards.</li>
+        <li><b>Permutation:</b> enemy attack patterns.</li>
+        <li><b>Probability:</b> critical hits and loot.</li>
+      </ul>
+    </section>
+    <section class="panel">
+      <h2>📖 Adventure Log</h2>
+      <div id="gameLog" class="log"></div>
+    </section>
+    <section class="panel muted controls">
+      <h2>🎮 Keyboard Shortcuts</h2>
+      <div class="key-grid">
+        <span><kbd>W A S D</kbd> / arrows</span><b>Move</b>
+        <span><kbd>SPACE</kbd></span><b>Basic attack</b>
+        <span><kbd>Q</kbd></span><b>Arcane Strike · 20 MP</b>
+        <span><kbd>E</kbd></span><b>Gather / talk / quests</b>
+        <span><kbd>J</kbd></span><b>Quest journal</b>
+        <span><kbd>H</kbd></span><b>Use health potion</b>
+        <span><kbd>F</kbd></span><b>Eat berries · 2</b>
+        <span><kbd>V</kbd></span><b>Drink water</b>
+        <span><kbd>C</kbd></span><b>Craft potion · 3 berries</b>
+        <span><kbd>X</kbd></span><b>Craft Forest Blade</b>
+        <span><kbd>B</kbd></span><b>Build camp shelter</b>
+        <span><kbd>K</kbd></span><b>Found kingdom</b>
+        <span><kbd>R</kbd></span><b>Recruit royal guard</b>
+        <span><kbd>T</kbd></span><b>Declare war</b>
+        <span><kbd>M</kbd></span><b>Open / close world map</b>
+        <span><kbd>ESC</kbd></span><b>Close map</b>
+      </div>
+      <p>Map shows biomes, village, your position, kingdom keep and rival fortress.</p>
+    </section>
+  </aside>
+</main>
+
+<div id="startModal" class="overlay">
+  <div class="modal">
+    <h2>Welcome to Mathoria</h2>
+    <p>Create your adventurer.</p>
+    <label for="nameInput">Character name</label>
+    <input id="nameInput" maxlength="16" value="Adventurer">
+    <label for="classInput">Character class</label>
+    <select id="classInput">
+      <option value="Knight">Knight — balanced</option>
+      <option value="Mage">Mage — high attack</option>
+      <option value="Ranger">Ranger — critical chance</option>
+    </select>
+    <button id="startButton" class="wide">Start Adventure ⚔</button>
+  </div>
+</div>
+
+<div id="worldMapModal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="mapTitle">
+  <div class="map-modal">
+    <div class="map-heading">
+      <div><h2 id="mapTitle">🗺 Mathoria World Map</h2><p class="muted">World: 6000 × 6000 · Press M or ESC to close</p></div>
+      <button id="closeMapButton" type="button">Close ✕</button>
+    </div>
+    <canvas id="worldMapCanvas" width="620" height="620"></canvas>
+    <div class="map-legend">
+      <span>🔵 You</span><span>◆ Quest</span><span>🟢 Village</span><span>🟡 Your Kingdom</span><span>🔴 Ironfang</span><span>⚔ Enemy units</span>
+    </div>
+    <p class="muted">Map is schematic. Explore the world to discover resources and enemies in the active area.</p>
+  </div>
+</div>
+<div id="questJournal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="journalTitle">
+  <div class="journal">
+    <div class="journal-head">
+      <h2 id="journalTitle">📜 Quest Journal</h2>
+      <button id="closeJournalButton" type="button">Close ✕</button>
+    </div>
+    <div id="journalTabs" class="journal-tabs">
+      <button type="button" data-tab="active" class="on">Active</button>
+      <button type="button" data-tab="main">👑 Main</button>
+      <button type="button" data-tab="side">🧭 Side</button>
+      <button type="button" data-tab="npc">💬 NPC</button>
+      <button type="button" data-tab="world">🌍 World</button>
+      <button type="button" data-tab="class">🎓 Character</button>
+      <button type="button" data-tab="done">Completed</button>
+    </div>
+    <div id="journalBody" class="journal-body"></div>
+  </div>
+</div>
+
+<div id="dialogueBox" class="dialogue hidden" role="dialog" aria-live="polite">
+  <div class="dlg-head"><div><b id="dlgName"></b> <small id="dlgRole"></small></div><button id="dlgClose" type="button">✕</button></div>
+  <p id="dlgText"></p>
+  <div id="dlgChoices" class="dlg-choices"></div>
+</div>
+<div id="toast" role="status"></div>
+<div id="startupError" class="overlay hidden">
+  <div class="modal">
+    <h2>Game could not start</h2>
+    <p>Mathoria could not load its JavaScript modules. Open this project through VS Code Live Server, not by double-clicking index.html.</p>
+    <p class="muted">Expected address: http://127.0.0.1:5500/index.html</p>
+    <p class="muted">Check that the complete js/ and css/ folders are beside index.html.</p>
+  </div>
+</div>
+<script>
+  window.setTimeout(() => {
+    if (!window.MATHORIA_BOOTED) document.getElementById("startupError").classList.remove("hidden");
+  }, 8000);
+</script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
